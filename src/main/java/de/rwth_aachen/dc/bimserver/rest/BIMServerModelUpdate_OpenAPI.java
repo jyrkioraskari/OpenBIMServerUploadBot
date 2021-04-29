@@ -1,6 +1,8 @@
 package de.rwth_aachen.dc.bimserver.rest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.IOUtils;
@@ -28,6 +31,8 @@ import org.bimserver.client.json.JsonBimServerClientFactory;
 import org.bimserver.interfaces.objects.SDeserializerPluginConfiguration;
 import org.bimserver.interfaces.objects.SObjectState;
 import org.bimserver.interfaces.objects.SProject;
+import org.bimserver.interfaces.objects.SRevision;
+import org.bimserver.interfaces.objects.SSerializerPluginConfiguration;
 import org.bimserver.shared.ChannelConnectionException;
 import org.bimserver.shared.UsernamePasswordAuthenticationInfo;
 import org.bimserver.shared.exceptions.BimServerClientException;
@@ -168,7 +173,10 @@ public class BIMServerModelUpdate_OpenAPI {
 	@Produces({ MediaType.TEXT_PLAIN, "application/ifc" })
 	public Response downloadIFCFromProject(@HeaderParam(HttpHeaders.ACCEPT) String accept_type) {
 		String project_id="default";
-		return Response.ok().build();
+		File file=downloadLastRelease(project_id); 
+		ResponseBuilder response = Response.ok((Object) file);  
+        response.header("Content-Disposition","attachment; filename=\"default_model.ifc\"");  
+        return response.build();  
 	}
 	
 
@@ -178,7 +186,10 @@ public class BIMServerModelUpdate_OpenAPI {
 	@Path("/download/{project_id}")
 	@Produces({ MediaType.TEXT_PLAIN, "application/ifc" })
 	public Response downloadIFCFromProject(@HeaderParam(HttpHeaders.ACCEPT) String accept_type,@PathParam("project_id") String project_id) {
-		return Response.ok().build();
+		File file=downloadLastRelease(project_id); 
+		ResponseBuilder response = Response.ok((Object) file);  
+        response.header("Content-Disposition","attachment; filename=\""+project_id+"_model.ifc\"");  
+        return response.build();  
 	}
 	
 
@@ -223,7 +234,7 @@ public class BIMServerModelUpdate_OpenAPI {
 		return null;
 	}
 
-	/*
+	
 	public File downloadLastRelease(String projectName) {
 		try {
 			JsonBimServerClientFactory factory = new JsonBimServerClientFactory("http://localhost:8090");
@@ -267,9 +278,5 @@ public class BIMServerModelUpdate_OpenAPI {
 		return null;
 	}
 	
-	public static void main(String[] args) {
-		IFCUpdate_OpenAPI api=new IFCUpdate_OpenAPI();
-		//api.uploadRelease("test10");
-	}
-*/
+
 }
